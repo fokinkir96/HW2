@@ -1,7 +1,7 @@
 package db;
 
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -16,10 +16,21 @@ public abstract class DbHandler{
     protected final String URL, USER, PASSWORD;
 
     public DbHandler(String path) throws IOException {
-        config.load(new FileReader(path));
+        config.load(this.getClassLoader(path));
         URL = config.getProperty("URL");
         USER = config.getProperty("USER");
         PASSWORD = config.getProperty("PASSWORD");
+    }
+
+    private InputStream getClassLoader(String fileName){
+        ClassLoader classLoader = getClass().getClassLoader();
+        InputStream inputStream = classLoader.getResourceAsStream(fileName);
+
+        if (inputStream == null) {
+            throw new IllegalArgumentException("file not found! " + fileName);
+        } else {
+            return inputStream;
+        }
     }
 
     public Connection getConnection() throws SQLException {
